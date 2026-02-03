@@ -157,16 +157,22 @@ function calcular() {
 }
 
 function guardar() {
-  const d = calcular();
+  const datos = calcular(); // 👈 aquí sí existe
 
-fetch("https://calculossemanales-production.up.railway.app/guardar", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(datos)
-})
-.then(res => res.json())
-.then(resp => console.log(resp))
-.catch(err => console.error(err));
+  fetch("https://calculossemanales.vercel.app/api/guardar", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(datos)
+  })
+  .then(res => res.json())
+  .then(resp => {
+    console.log("RESPUESTA:", resp);
+    alert("Guardado en Supabase ✅");
+  })
+  .catch(err => {
+    console.error("ERROR:", err);
+    alert("Error al guardar ❌");
+  });
 }
 function limpiar() {
   document.getElementById("capital").value = "";
