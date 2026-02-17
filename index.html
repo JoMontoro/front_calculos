@@ -17,7 +17,7 @@ body {
 }
 
 .container {
-  max-width: 500px;
+  max-width: 900px;
   margin: auto;
 }
 
@@ -25,6 +25,37 @@ h1 {
   text-align: center;
   margin-bottom: 20px;
   color: #2c3e50;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ecf0f1;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  color: #7f8c8d;
+  font-size: 16px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: 0.3s;
+}
+
+.tab-btn.active {
+  color: #3498db;
+  border-bottom-color: #3498db;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
 }
 
 .card {
@@ -40,7 +71,7 @@ h2, h3 {
   color: #34495e;
 }
 
-input {
+input, select, textarea {
   width: 100%;
   padding: 10px;
   margin-top: 8px;
@@ -49,7 +80,7 @@ input {
   font-size: 15px;
 }
 
-input:focus {
+input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: #3498db;
 }
@@ -57,6 +88,12 @@ input:focus {
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 10px;
 }
 
@@ -97,43 +134,266 @@ button.borrar {
   background: #e74c3c;
 }
 
+button.editar {
+  background: #f39c12;
+  flex: none;
+  padding: 5px 10px;
+  font-size: 13px;
+}
+
+button.pagar {
+  background: #16a085;
+  flex: none;
+  padding: 5px 10px;
+  font-size: 13px;
+}
+
+.tabla-sangrias {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.tabla-sangrias th {
+  background: #34495e;
+  color: white;
+  padding: 10px;
+  text-align: left;
+}
+
+.tabla-sangrias td {
+  padding: 10px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.tabla-sangrias tr:hover {
+  background: #f5f7fa;
+}
+
+.estado-pagado {
+  background: #d5f4e6;
+  color: #27ae60;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.estado-pendiente {
+  background: #fdeaa8;
+  color: #d68910;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-contenido {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal-header {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.cerrar-modal {
+  background: #95a5a6;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+}
+
 </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>Cálculo semanal</h1>
+  <h1>Control de Ingresos</h1>
 
-  <div class="card">
-    <h3>Ingrese su capital</h3>
-    <input type="number" id="capital" placeholder="Capital" min="0">
+  <!-- PESTAÑAS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="cambiarTab('calculos')">Cálculo Semanal</button>
+    <button class="tab-btn" onclick="cambiarTab('sangrias')">Sangrías</button>
   </div>
 
-  <div class="card">
-    <h2>Insumos</h2>
+  <!-- TAB 1: CÁLCULO SEMANAL -->
+  <div id="calculos" class="tab-content active">
+    <div class="card">
+      <h3>Ingrese su capital</h3>
+      <input type="number" id="capital" placeholder="Capital" min="0">
+    </div>
 
-    <div class="grid">
-      <input type="number" id="vino" placeholder="Vino" min="0">
-      <input type="number" id="naranja" placeholder="Naranja" min="0">
-      <input type="number" id="azucar" placeholder="Azúcar" min="0">
-      <input type="number" id="pina" placeholder="Piña" min="0">
-      <input type="number" id="botella" placeholder="Botella y capuchón" min="0">
+    <div class="card">
+      <h2>Insumos</h2>
+
+      <div class="grid">
+        <input type="number" id="vino" placeholder="Vino" min="0">
+        <input type="number" id="naranja" placeholder="Naranja" min="0">
+        <input type="number" id="azucar" placeholder="Azúcar" min="0">
+        <input type="number" id="pina" placeholder="Piña" min="0">
+        <input type="number" id="botella" placeholder="Botella y capuchón" min="0">
+      </div>
+    </div>
+
+    <div class="resultado card">
+      <p>Total de insumos: <strong>S/ <span id="totalInsumos">0.00</span></strong></p>
+      <p>Ganancia: <strong>S/ <span id="ganancia">0.00</span></strong></p>
+    </div>
+
+    <div class="botones">
+      <button onclick="calcular()">Calcular</button>
+      <button class="guardar" onclick="guardar()">Guardar en BD</button>
+      <button class="borrar" onclick="limpiar()">Borrar</button>
     </div>
   </div>
 
-  <div class="resultado card">
-    <p>Total de insumos: <strong>S/ <span id="totalInsumos">0.00</span></strong></p>
-    <p>Ganancia: <strong>S/ <span id="ganancia">0.00</span></strong></p>
-  </div>
+  <!-- TAB 2: SANGRÍAS -->
+  <div id="sangrias" class="tab-content">
+    <div class="card">
+      <h2>Registrar Sangría</h2>
+      
+      <label>Fecha de venta</label>
+      <input type="date" id="fechaSangria" required>
 
-  <div class="botones">
-    <button onclick="calcular()">Calcular</button>
-    <button class="guardar" onclick="guardar()">Guardar en BD</button>
-    <button class="borrar" onclick="limpiar()">Borrar</button>
+      <label style="margin-top: 15px;">Cantidad de botellas</label>
+      <input type="number" id="cantidadBotellas" placeholder="Cantidad" min="1" value="1">
+
+      <label style="margin-top: 15px;">Precio unitario (S/)</label>
+      <input type="number" id="precioUnitario" placeholder="Precio" min="0" step="0.01">
+
+      <label style="margin-top: 15px;">Cliente (opcional)</label>
+      <input type="text" id="clienteSangria" placeholder="Nombre del cliente">
+
+      <label style="margin-top: 15px;">Estado de pago</label>
+      <select id="estadoPago">
+        <option value="pendiente">Pendiente</option>
+        <option value="pagado">Pagado</option>
+      </select>
+
+      <label style="margin-top: 15px;">Notas (opcional)</label>
+      <textarea id="notasSangria" placeholder="Notas adicionales" style="resize: vertical; height: 80px;"></textarea>
+
+      <div class="botones" style="margin-top: 15px;">
+        <button class="guardar" onclick="registrarSangria()">Registrar Sangría</button>
+        <button class="borrar" onclick="limpiarFormularioSangria()">Limpiar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Sangrías Registradas</h2>
+      
+      <div style="margin-bottom: 15px;">
+        <label>Filtrar por mes:</label>
+        <input type="month" id="filtroMes" style="width: auto; padding: 8px;" onchange="filtrarSangrias()">
+        <button onclick="mostrarTodasLasSangrias()" style="margin-left: 10px; width: auto; padding: 8px 15px;">Ver todas</button>
+      </div>
+
+      <div id="contenedorSangrias">
+        <table class="tabla-sangrias">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Cantidad</th>
+              <th>Precio Unit.</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="listaSangrias">
+            <tr>
+              <td colspan="7" style="text-align: center; color: #7f8c8d;">Sin registros</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="resultado card" style="margin-top: 15px;">
+        <p>Total vendido: <strong>S/ <span id="totalVendido">0.00</span></strong></p>
+        <p>Total pagado: <strong>S/ <span id="totalPagado">0.00</span></strong></p>
+        <p>Total pendiente: <strong>S/ <span id="totalPendiente">0.00</span></strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PARA EDITAR SANGRÍA -->
+<div id="modalEditar" class="modal">
+  <div class="modal-contenido">
+    <button class="cerrar-modal" onclick="cerrarModal()">&times;</button>
+    <div class="modal-header">Editar Sangría</div>
+    
+    <label>Fecha</label>
+    <input type="date" id="editarFecha">
+
+    <label style="margin-top: 15px;">Cantidad</label>
+    <input type="number" id="editarCantidad" min="1">
+
+    <label style="margin-top: 15px;">Precio unitario (S/)</label>
+    <input type="number" id="editarPrecio" min="0" step="0.01">
+
+    <label style="margin-top: 15px;">Cliente</label>
+    <input type="text" id="editarCliente">
+
+    <label style="margin-top: 15px;">Estado de pago</label>
+    <select id="editarEstado">
+      <option value="pendiente">Pendiente</option>
+      <option value="pagado">Pagado</option>
+    </select>
+
+    <label style="margin-top: 15px;">Notas</label>
+    <textarea id="editarNotas" style="resize: vertical; height: 80px;"></textarea>
+
+    <div class="botones" style="margin-top: 15px;">
+      <button class="guardar" onclick="guardarCambiosSangria()">Guardar</button>
+      <button class="borrar" onclick="eliminarSangria()">Eliminar</button>
+    </div>
   </div>
 </div>
 
 <script>
+const API_BASE = "https://calculossemanales.vercel.app"; // Cambia si pruebas en local: http://localhost:3000
+// ========== FUNCIONES DE PESTAÑAS ==========
+function cambiarTab(tabName) {
+  const tabs = document.querySelectorAll('.tab-content');
+  const btns = document.querySelectorAll('.tab-btn');
+  
+  tabs.forEach(tab => tab.classList.remove('active'));
+  btns.forEach(btn => btn.classList.remove('active'));
+  
+  document.getElementById(tabName).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ========== FUNCIONES DE CÁLCULO SEMANAL ==========
 function calcular() {
   const v = id => +document.getElementById(id).value || 0;
 
@@ -147,7 +407,6 @@ function calcular() {
   const total = vino + naranja + azucar + pina + botella;
   const ganancia = capital - total;
 
-  // 👇 Usa los IDs correctos
   document.getElementById("totalInsumos").innerText = total.toFixed(2);
   document.getElementById("ganancia").innerText = ganancia.toFixed(2);
 
@@ -155,9 +414,9 @@ function calcular() {
 }
 
 function guardar() {
-  const datos = calcular(); // 👈 aquí sí existe
+  const datos = calcular();
 
-  fetch("https://calculossemanales.vercel.app/api/guardar", {
+  fetch(`${API_BASE}/api/guardar`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(datos)
@@ -172,6 +431,7 @@ function guardar() {
     alert("Error al guardar ❌");
   });
 }
+
 function limpiar() {
   document.getElementById("capital").value = "";
   document.getElementById("vino").value = "";
@@ -183,6 +443,231 @@ function limpiar() {
   document.getElementById("totalInsumos").innerText = "0.00";
   document.getElementById("ganancia").innerText = "0.00";
 }
+
+// ========== FUNCIONES DE SANGRÍAS ==========
+let sangriaEnEdicion = null;
+let listaSangrias = JSON.parse(localStorage.getItem('sangriasList')) || [];
+
+function registrarSangria() {
+  const fecha = document.getElementById('fechaSangria').value;
+  const cantidad = +document.getElementById('cantidadBotellas').value || 0;
+  const precio = +document.getElementById('precioUnitario').value || 0;
+  const cliente = document.getElementById('clienteSangria').value || 'Sin cliente';
+  const estado = document.getElementById('estadoPago').value;
+  const notas = document.getElementById('notasSangria').value;
+
+  if (!fecha || cantidad <= 0 || precio <= 0) {
+    alert('Por favor completa todos los campos requeridos');
+    return;
+  }
+
+  const sangria = {
+    fecha,
+    cantidad,
+    precio,
+    cliente,
+    estado,
+    notas,
+    total: (cantidad * precio).toFixed(2)
+  };
+
+  fetch(`${API_BASE}/api/guardar-sangria`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(sangria)
+  })
+  .then(res => res.json())
+  .then(resp => {
+    console.log("RESPUESTA:", resp);
+    sangria.id = resp?.data?.id || resp?.id || Date.now();
+    listaSangrias.push(sangria);
+    guardarEnLocalStorage();
+    limpiarFormularioSangria();
+    mostrarTodasLasSangrias();
+    alert('Sangría registrada ✅');
+  })
+  .catch(err => {
+    console.error("ERROR:", err);
+    alert('Error al registrar ❌');
+  });
+}
+
+function limpiarFormularioSangria() {
+  document.getElementById('fechaSangria').value = '';
+  document.getElementById('cantidadBotellas').value = '1';
+  document.getElementById('precioUnitario').value = '';
+  document.getElementById('clienteSangria').value = '';
+  document.getElementById('estadoPago').value = 'pendiente';
+  document.getElementById('notasSangria').value = '';
+}
+
+function guardarEnLocalStorage() {
+  localStorage.setItem('sangriasList', JSON.stringify(listaSangrias));
+}
+
+function mostrarTodasLasSangrias() {
+  document.getElementById('filtroMes').value = '';
+  mostrarSangrias(listaSangrias);
+}
+
+function filtrarSangrias() {
+  const mes = document.getElementById('filtroMes').value;
+  
+  if (!mes) {
+    mostrarTodasLasSangrias();
+    return;
+  }
+
+  const filtradas = listaSangrias.filter(s => s.fecha.startsWith(mes));
+  mostrarSangrias(filtradas);
+}
+
+function mostrarSangrias(sangrias) {
+  const tbody = document.getElementById('listaSangrias');
+  
+  if (sangrias.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #7f8c8d;">Sin registros</td></tr>';
+    actualizarTotales([]);
+    return;
+  }
+
+  tbody.innerHTML = sangrias.map(s => `
+    <tr>
+      <td>${new Date(s.fecha).toLocaleDateString('es-PE')}</td>
+      <td>${s.cliente}</td>
+      <td>${s.cantidad}</td>
+      <td>S/ ${parseFloat(s.precio).toFixed(2)}</td>
+      <td><strong>S/ ${s.total}</strong></td>
+      <td>
+        <span class="${s.estado === 'pagado' ? 'estado-pagado' : 'estado-pendiente'}">
+          ${s.estado.charAt(0).toUpperCase() + s.estado.slice(1)}
+        </span>
+      </td>
+      <td>
+        <button class="editar" onclick="abrirModalEdicion(${s.id})">Editar</button>
+      </td>
+    </tr>
+  `).join('');
+
+  actualizarTotales(sangrias);
+}
+
+function actualizarTotales(sangrias) {
+  const totalVendido = sangrias.reduce((sum, s) => sum + parseFloat(s.total), 0);
+  const totalPagado = sangrias.filter(s => s.estado === 'pagado').reduce((sum, s) => sum + parseFloat(s.total), 0);
+  const totalPendiente = totalVendido - totalPagado;
+
+  document.getElementById('totalVendido').innerText = totalVendido.toFixed(2);
+  document.getElementById('totalPagado').innerText = totalPagado.toFixed(2);
+  document.getElementById('totalPendiente').innerText = totalPendiente.toFixed(2);
+}
+
+function abrirModalEdicion(id) {
+  sangriaEnEdicion = id;
+  const sangria = listaSangrias.find(s => s.id === id);
+  
+  document.getElementById('editarFecha').value = sangria.fecha;
+  document.getElementById('editarCantidad').value = sangria.cantidad;
+  document.getElementById('editarPrecio').value = sangria.precio;
+  document.getElementById('editarCliente').value = sangria.cliente;
+  document.getElementById('editarEstado').value = sangria.estado;
+  document.getElementById('editarNotas').value = sangria.notas;
+
+  document.getElementById('modalEditar').classList.add('active');
+}
+
+function cerrarModal() {
+  document.getElementById('modalEditar').classList.remove('active');
+}
+
+function guardarCambiosSangria() {
+  const index = listaSangrias.findIndex(s => s.id === sangriaEnEdicion);
+  
+  if (index !== -1) {
+    const datosActualizados = {
+      id: sangriaEnEdicion,
+      fecha: document.getElementById('editarFecha').value,
+      cantidad: +document.getElementById('editarCantidad').value,
+      precio: +document.getElementById('editarPrecio').value,
+      cliente: document.getElementById('editarCliente').value,
+      estado: document.getElementById('editarEstado').value,
+      notas: document.getElementById('editarNotas').value,
+      total: (+document.getElementById('editarCantidad').value * +document.getElementById('editarPrecio').value).toFixed(2)
+    };
+
+    fetch(`${API_BASE}/api/actualizar-sangria`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datosActualizados)
+    })
+    .then(res => res.json())
+    .then(resp => {
+      listaSangrias[index] = resp?.data || datosActualizados;
+      guardarEnLocalStorage();
+      mostrarTodasLasSangrias();
+      cerrarModal();
+      alert('Cambios guardados ✅');
+    })
+    .catch(err => {
+      console.error("ERROR:", err);
+      alert('Error al guardar ❌');
+    });
+  }
+}
+
+function eliminarSangria() {
+  if (confirm('¿Estás seguro de que deseas eliminar este registro?')) {
+    fetch(`${API_BASE}/api/eliminar-sangria`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: sangriaEnEdicion })
+    })
+    .then(res => res.json())
+    .then(resp => {
+      if (resp?.ok) {
+        listaSangrias = listaSangrias.filter(s => s.id !== sangriaEnEdicion);
+        guardarEnLocalStorage();
+        mostrarTodasLasSangrias();
+        cerrarModal();
+        alert('Registro eliminado ✅');
+      } else {
+        console.error('Error al eliminar, respuesta:', resp);
+        alert('Error al eliminar ❌');
+      }
+    })
+    .catch(err => {
+      console.error("ERROR:", err);
+      alert('Error al eliminar ❌');
+    });
+  }
+}
+
+// Cargar sangrías desde BD al cargar la página
+window.addEventListener('load', () => {
+  fetch(`${API_BASE}/api/obtener-sangrias`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.sangrias && data.sangrias.length > 0) {
+        listaSangrias = data.sangrias;
+        guardarEnLocalStorage();
+        mostrarTodasLasSangrias();
+      }
+    })
+    .catch(err => {
+      console.error("Error al cargar sangrías:", err);
+      // Usar localStorage como respaldo si la BD no responde
+      if (listaSangrias.length > 0) {
+        mostrarTodasLasSangrias();
+      }
+    });
+});
+
+// Cerrar modal al hacer click fuera
+window.onclick = function(event) {
+  const modal = document.getElementById('modalEditar');
+  if (event.target === modal) {
+    cerrarModal();
+  }
+}
 </script>
-</body>
 </html>
