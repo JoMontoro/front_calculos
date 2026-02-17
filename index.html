@@ -544,7 +544,7 @@ function mostrarSangrias(sangrias) {
         </span>
       </td>
       <td>
-        <button class="editar" onclick="abrirModalEdicion(${s.id})">Editar</button>
+        <button class="editar" onclick="abrirModalEdicion(${JSON.stringify(s.id)})">Editar</button>
       </td>
     </tr>
   `).join('');
@@ -564,14 +564,18 @@ function actualizarTotales(sangrias) {
 
 function abrirModalEdicion(id) {
   sangriaEnEdicion = id;
-  const sangria = listaSangrias.find(s => s.id === id);
-  
-  document.getElementById('editarFecha').value = sangria.fecha;
-  document.getElementById('editarCantidad').value = sangria.cantidad;
-  document.getElementById('editarPrecio').value = sangria.precio;
-  document.getElementById('editarCliente').value = sangria.cliente;
-  document.getElementById('editarEstado').value = sangria.estado;
-  document.getElementById('editarNotas').value = sangria.notas;
+  const sangria = listaSangrias.find(s => String(s.id) === String(id));
+  if (!sangria) {
+    alert('Registro no encontrado para editar');
+    return;
+  }
+
+  document.getElementById('editarFecha').value = sangria.fecha || '';
+  document.getElementById('editarCantidad').value = sangria.cantidad || 1;
+  document.getElementById('editarPrecio').value = sangria.precio || '';
+  document.getElementById('editarCliente').value = sangria.cliente || '';
+  document.getElementById('editarEstado').value = sangria.estado || 'pendiente';
+  document.getElementById('editarNotas').value = sangria.notas || '';
 
   document.getElementById('modalEditar').classList.add('active');
 }
@@ -595,6 +599,8 @@ function guardarCambiosSangria() {
       total: (+document.getElementById('editarCantidad').value * +document.getElementById('editarPrecio').value).toFixed(2)
     };
 
+    console.log('Enviando PUT /api/actualizar-sangria', datosActualizados);
+    const idx = listaSangrias.findIndex(s => String(s.id) === String(sangriaEnEdicion));
     fetch(`${API_BASE}/api/actualizar-sangria`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -602,7 +608,11 @@ function guardarCambiosSangria() {
     })
     .then(res => res.json())
     .then(resp => {
-      listaSangrias[index] = resp?.data || datosActualizados;
+      console.log('Respuesta PUT:', resp);
+      const returned = resp?.data || resp || datosActualizados;
+      // find index again defensively
+      const finalIndex = idx !== -1 ? idx : listaSangrias.findIndex(s => String(s.id) === String(returned.id));
+      if (finalIndex !== -1) listaSangrias[finalIndex] = returned;
       guardarEnLocalStorage();
       mostrarTodasLasSangrias();
       cerrarModal();
@@ -617,21 +627,28 @@ function guardarCambiosSangria() {
 
 function eliminarSangria() {
   if (confirm('¿Estás seguro de que deseas eliminar este registro?')) {
+    console.log('Enviando DELETE /api/eliminar-sangria', { id: sangriaEnEdicion });
     fetch(`${API_BASE}/api/eliminar-sangria`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: sangriaEnEdicion })
     })
-    .then(res => res.json())
-    .then(resp => {
-      if (resp?.ok) {
-        listaSangrias = listaSangrias.filter(s => s.id !== sangriaEnEdicion);
+    .then(async res => {
+      let body = null;
+      try { body = await res.json(); } catch(e) { body = null; }
+      console.log('Respuesta DELETE status', res.status, 'body', body);
+      return { status: res.status, body };
+    })
+    .then(({ status, body }) => {
+      // aceptar 200/204 y body.ok
+      if (status === 204 || body?.ok || body) {
+        listaSangrias = listaSangrias.filter(s => String(s.id) !== String(sangriaEnEdicion));
         guardarEnLocalStorage();
         mostrarTodasLasSangrias();
         cerrarModal();
         alert('Registro eliminado ✅');
       } else {
-        console.error('Error al eliminar, respuesta:', resp);
+        console.error('Error al eliminar, respuesta:', body);
         alert('Error al eliminar ❌');
       }
     })
